@@ -1,4 +1,13 @@
 ## GoIT Node.js Course Template Homework
+- npm i eslint-config-prettier -DE
+- npm i eslint-plugin-json -DE
+- npm init -y
+- npm install express, morgan, cors
+- npm i uuid
+- npm i joi
+- postman
+
+
 
 Выполните форк этого репозитория для выполнения домашних заданий (2-6)
 Форк создаст репозиторий на вашем http://github.com
