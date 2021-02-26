@@ -1,4 +1,5 @@
 ## GoIT Node.js Course Template Homework
+-  npm install mongoose -S
 - npm i dotenv mongodb -E
 - npm i eslint-config-prettier -DE
 - npm i eslint-plugin-json -DE
