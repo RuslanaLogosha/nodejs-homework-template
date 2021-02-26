@@ -6,7 +6,7 @@ const validate = require('./validation');
 
 router.get('/', async (_req, res, next) => {
   try {
-    const contacts = await Contacts.listContacts();
+    const contacts = await Contacts.getAllContacts();
     return res.json({
       status: 'success',
       code: 200,
