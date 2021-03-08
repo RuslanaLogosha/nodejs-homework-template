@@ -16,7 +16,7 @@ async function create(req, res, next) {
         status: Status.ERROR,
         code: HttpCode.CONFLICT,
         data: 'Conflict',
-        message: 'Email is already use',
+        message: 'Email is already in use',
       });
     }
 

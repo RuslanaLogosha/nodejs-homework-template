@@ -6,13 +6,13 @@ const Users = require('../model/users');
 
 const SECRET_KEY = process.env.JWT_SECRET;
 
-const opts = {
+const params = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
   secretOrKey: SECRET_KEY,
 };
 
 passport.use(
-  new Strategy(opts, async (payload, done) => {
+  new Strategy(params, async (payload, done) => {
     try {
       const user = await Users.findById(payload.id);
 

@@ -1,5 +1,6 @@
 ## GoIT Node.js Course Template Homework
 
+- npm i bcryptjs
 - npm i mongoose-paginate-v2
 - npm i jsonwebtoken
 - npm i passport-jwt

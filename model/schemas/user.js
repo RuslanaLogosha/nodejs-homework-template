@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 
 const { Subscription } = require('../../helpers/constants');
 
-const SALT_WORK_FACTOR = 10;
+const SALT_WORK_FACTOR = 8;
 
 const userSchema = new Schema(
   {
