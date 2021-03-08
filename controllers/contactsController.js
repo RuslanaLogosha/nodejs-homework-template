@@ -1,11 +1,12 @@
 const Contacts = require('../model/contacts');
+const { HttpCode, Status } = require('../helpers/constants');
 
 const getAllContacts = async (_req, res, next) => {
   try {
     const contacts = await Contacts.getAllContacts();
     return res.json({
-      status: 'success',
-      code: 200,
+      status: Status.SUCCESS,
+      code: HttpCode.OK,
       data: {
         contacts,
       },
@@ -20,16 +21,16 @@ const getContactById = async (req, res, next) => {
     const contact = await Contacts.getContactById(req.params.id);
     if (contact) {
       return res.json({
-        status: 'success',
-        code: 200,
+        status: Status.SUCCESS,
+        code: HttpCode.OK,
         data: {
           contact,
         },
       });
     } else {
-      return res.status(404).json({
-        status: 'error',
-        code: 404,
+      return res.status(HttpCode.NOT_FOUND).json({
+        status: Status.ERROR,
+        code: HttpCode.NOT_FOUND,
         data: 'Not Found',
       });
     }
