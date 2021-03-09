@@ -1,34 +1,74 @@
 const Contact = require('./schemas/contact');
 
-const getAllContacts = async () => {
-  const results = await Contact.find({});
-  return results;
-};
+async function getAllContacts(
+  userId,
+  { sortBy, sortByDesc, filter, limit = '5', page = '1' },
+) {
+  console.log(userId);
+  const results = await Contact.paginate(
+    { owner: userId },
+    {
+      limit,
+      page,
+      sort: {
+        ...(sortBy ? { [`${sortBy}`]: 1 } : {}),
+        ...(sortByDesc ? { [`${sortByDesc}`]: -1 } : {}),
+      },
+      select: filter ? filter.split('|').join(' ') : '',
+      populate: {
+        path: 'owner',
+        select: 'name email -_id',
+      },
+    },
+  );
 
-const getContactById = async id => {
-  const result = await Contact.findOne({ _id: id });
+  const { docs: contacts, totalDocs: total } = results;
+  return { total: total.toString(), limit, page, contacts };
+}
+
+async function getContactById(contactId, userId) {
+  const result = await Contact.findOne({
+    _id: contactId,
+    owner: userId,
+  }).populate({
+    path: 'owner',
+    select: 'email -_id',
+  });
   return result;
-};
+}
 
-const addContact = async body => {
+async function addContact(body) {
   const result = await Contact.create(body);
   return result;
-};
+}
 
-const updateContact = async (id, body) => {
-  const result = await Contact.findByIdAndUpdate({ _id: id }, { ...body }, { new: true });
+async function removeContact(contactId, userId) {
+  const result = await Contact.findByIdAndDelete({
+    _id: contactId,
+    owner: userId,
+  }).populate({
+    path: 'owner',
+    select: 'email -_id',
+  });
   return result;
-};
+}
 
-const removeContact = async id => {
-  const result = await Contact.findByIdAndDelete({ _id: id });
+async function updateContact(contactId, reqBody, userId) {
+  const result = await Contact.findByIdAndUpdate(
+    { _id: contactId, owner: userId },
+    { ...reqBody },
+    { new: true },
+  ).populate({
+    path: 'owner',
+    select: 'email -_id',
+  });
   return result;
-};
+}
 
 module.exports = {
   getAllContacts,
   getContactById,
+  removeContact,
   addContact,
   updateContact,
-  removeContact,
 };

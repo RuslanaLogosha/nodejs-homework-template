@@ -1,9 +1,18 @@
 const Joi = require('joi');
+const { HttpCode, ContactType } = require('../../../helpers/constants');
 
 const schemaCreateContact = Joi.object({
   name: Joi.string().alphanum().min(3).max(30).required(),
-  email: Joi.string().email().required(),
+  email: Joi.string()
+    .email()
+    .pattern(/\S+@\S+\.\S+/)
+    .required(),
   phone: Joi.number().required(),
+  category: Joi.string().valid(
+    ContactType.OTHER,
+    ContactType.FRIEND,
+    ContactType.WORK,
+  ),
 });
 
 const schemaUpdateContactField = Joi.alternatives().try(
@@ -11,16 +20,31 @@ const schemaUpdateContactField = Joi.alternatives().try(
     name: Joi.string().alphanum().min(3).max(30).required(),
     email: Joi.string().email(),
     phone: Joi.number(),
+    category: Joi.string().valid(
+      ContactType.OTHER,
+      ContactType.FRIEND,
+      ContactType.WORK,
+    ),
   }),
+
   Joi.object({
     name: Joi.string().alphanum().min(3).max(30),
     email: Joi.string().email().required(),
     phone: Joi.number(),
+    category: Joi.string().valid(
+      ContactType.OTHER,
+      ContactType.FRIEND,
+      ContactType.WORK,
+    ),
   }),
+
   Joi.object({
     name: Joi.string().alphanum().min(3).max(30),
     email: Joi.string().email(),
     phone: Joi.number().required(),
+    category: Joi.string()
+      .valid(ContactType.OTHER, ContactType.FRIEND, ContactType.WORK)
+      .required(),
   }),
 );
 
@@ -29,7 +53,7 @@ const validate = (schema, obj, next) => {
   if (error) {
     const [{ message }] = error.details;
     return next({
-      status: 400,
+      status: HttpCode.BAD_REQUEST,
       message: `Field ${message.replace(/"/g, '')}`,
     });
   }
