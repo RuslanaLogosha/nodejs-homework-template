@@ -3,6 +3,7 @@ const fs = require('fs').promises;
 const path = require('path');
 const Jimp = require('jimp');
 require('dotenv').config();
+const { nanoid } = require('nanoid');
 
 const Users = require('../model/users');
 const { HttpCode, Status } = require('../helpers/constants');
@@ -12,11 +13,13 @@ const {
   deletePreviousAvatar,
 } = require('../helpers/avatar-handler');
 
+const EmailService = require('../services/email-verification');
+
 const SECRET_KEY = process.env.JWT_SECRET;
 
 async function create(req, res, next) {
   try {
-    const { email } = req.body;
+    const { email, name } = req.body;
 
     const user = await Users.findByEmail(email);
     if (user) {
@@ -28,7 +31,20 @@ async function create(req, res, next) {
       });
     }
 
-    const newUser = await Users.createUser(req.body);
+    // create verification token
+    const verificationToken = nanoid();
+
+    // send verification email
+    const emailService = new EmailService(process.env.NODE_ENV);
+    await emailService.sendVerificationEmail(verificationToken, email, name);
+
+    // create user in db
+    const newUser = await Users.createUser({
+      ...req.body,
+      verified: false,
+      verificationToken,
+    });
+
     //fetch avatar made by gravatar
     const { pathToTmpFolder, fileName } = await downloadAvatarByUrl(newUser);
     //edit and save avatar to static folder
@@ -66,6 +82,15 @@ async function login(req, res, next) {
         code: HttpCode.UNAUTHORIZED,
         data: 'UNAUTHORIZED',
         message: 'Invalid credentials',
+      });
+    }
+
+    if (!user.verified) {
+      return res.status(HttpCode.UNAUTHORIZED).json({
+        status: Status.ERROR,
+        code: HttpCode.UNAUTHORIZED,
+        data: 'UNAUTHORIZED',
+        message: 'User not verified by email',
       });
     }
 
@@ -155,6 +180,33 @@ async function updateAvatar(req, res, next) {
   }
 }
 
+async function verifyEmail(req, res, next) {
+  try {
+    const user = await Users.findUserByVerificationToken(
+      req.params.verificationToken,
+    );
+
+    if (user) {
+      await Users.updateVerificationToken(user._id, true, null);
+
+      return res.status(HttpCode.OK).json({
+        status: Status.SUCCESS,
+        code: HttpCode.OK,
+        message: 'Verification successful',
+      });
+    }
+
+    return res.status(HttpCode.BAD_REQUEST).json({
+      status: Status.ERROR,
+      code: HttpCode.BAD_REQUEST,
+      data: 'Bad request',
+      message: 'Link is not valid',
+    });
+  } catch (e) {
+    next(e);
+  }
+}
+
 module.exports = {
   create,
   login,
@@ -162,4 +214,5 @@ module.exports = {
   current,
   updateSubscription,
   updateAvatar,
+  verifyEmail,
 };
