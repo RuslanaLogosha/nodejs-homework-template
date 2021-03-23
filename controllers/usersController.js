@@ -14,7 +14,6 @@ const {
 } = require('../helpers/avatar-handler');
 
 const EmailService = require('../services/email-verification');
-
 const SECRET_KEY = process.env.JWT_SECRET;
 
 async function create(req, res, next) {
@@ -48,7 +47,7 @@ async function create(req, res, next) {
     //fetch avatar made by gravatar
     const { pathToTmpFolder, fileName } = await downloadAvatarByUrl(newUser);
     //edit and save avatar to static folder
-    const newAvatarUrl = await savAvatarToStatic(
+    const newAvatarUrl = await saveAvatarToStatic(
       newUser.id,
       pathToTmpFolder,
       fileName,
@@ -66,6 +65,7 @@ async function create(req, res, next) {
       },
     });
   } catch (e) {
+    console.log(e.message);
     next(e);
   }
 }
