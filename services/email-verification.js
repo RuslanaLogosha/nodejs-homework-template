@@ -35,7 +35,7 @@ class EmailService {
     const template = {
       body: {
         name,
-        intro: 'Welcome to... something...',
+        intro: 'Welcome',
         action: {
           instructions:
             'Please click the button below to complete sign up process',
